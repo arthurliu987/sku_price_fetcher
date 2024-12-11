@@ -18,10 +18,10 @@ SKU Price Fetcher is a tool designed to fetch and display prices for various SKU
     ```
 3. Create a .env file in root directory with values for:
     ```
-        CLIENT_ID = yourebayclientid
-        CLIENT_SECRET = yourebayclientsecret
+    CLIENT_ID = yourebayclientid
+    CLIENT_SECRET = yourebayclientsecret
 
-        GOOGLE_API_KEY = yourgoogleapikey
+    GOOGLE_API_KEY = yourgoogleapikey
     ```
 
 
