@@ -123,17 +123,17 @@ def get_guitar_center_price(item_name):
         soup = BeautifulSoup(response.content, "html.parser")
 
         # when querying guitar center, it can either return a list of products or a single product page if the match is close enough
-        # if the product_titles is empty, then we are on a single product page
         product_titles = soup.find_all("div", class_="plp-product-details")
 
+        # if the product_titles is empty, then we are on a single product page
         if product_titles == []:
+            # getting the product price is a horrendous process
             product_name = soup.find("h1").text.strip() if soup.find(
                 "h1") else "Product name not found"
             data = soup.find("script", id="__NEXT_DATA__",
                              type="application/json")
             jsondata = json.loads(data.text)
 
-            # getting the product price is a horrendous process
             product_price = jsondata["props"]["pageProps"]["dehydratedState"]["queries"][
                 0]["state"]["data"]["PDPStyleSelector"]['styleSelectorArr'][0]['salePrice']
 
@@ -189,11 +189,9 @@ def get_amazon_results(search_query):
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, "html.parser")
 
-        # Extract the product title
         title_element = soup.find("span", id="productTitle")
         product_title = title_element.text.strip() if title_element else "Title not found"
 
-        # Extract the product price
         price_element = soup.find("span", class_="a-price-whole")
         price_fraction_element = soup.find("span", class_="a-price-fraction")
 
