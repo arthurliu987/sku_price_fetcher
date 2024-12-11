@@ -32,6 +32,7 @@ class SearchResult(object):
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GOOGLE_CUSTOM_SEARCH_ENGINE_KEY = os.getenv("GOOGLE_CUSTOM_SEARCH_ENGINE_KEY")
 EBAY_ENDPOINT = "https://api.ebay.com/buy/browse/v1/item_summary/search"
 TEST_SKU = "761294512418"
 
@@ -88,12 +89,13 @@ def get_ebay_price(sku):
                 searchResults.append(SearchResult(
                     source="Ebay", name=title, price=price, url=url))
 
+            print("Ebay Results Fetched")
         except (IndexError, KeyError):
-            return "Price not available"
+            print("Error fetching Ebay Results")
 
-        print("Ebay Results Fetched")
     else:
-        return f"Error: {response.status_code} {response.text}"
+        print(f"Failed to retrieve Ebay prices: {
+              response.status_code} {response.text}")
 
 
 def get_item_name(sku):
@@ -126,32 +128,36 @@ def get_guitar_center_price(item_name):
         product_titles = soup.find_all("div", class_="plp-product-details")
 
         # if the product_titles is empty, then we are on a single product page
-        if product_titles == []:
-            # getting the product price is a horrendous process
-            product_name = soup.find("h1").text.strip() if soup.find(
-                "h1") else "Product name not found"
-            data = soup.find("script", id="__NEXT_DATA__",
-                             type="application/json")
-            jsondata = json.loads(data.text)
+        try:
+            if product_titles == []:
 
-            product_price = jsondata["props"]["pageProps"]["dehydratedState"]["queries"][
-                0]["state"]["data"]["PDPStyleSelector"]['styleSelectorArr'][0]['salePrice']
+                # getting the product price is a horrendous process
+                product_name = soup.find("h1").text.strip() if soup.find(
+                    "h1") else "Product name not found"
+                data = soup.find("script", id="__NEXT_DATA__",
+                                 type="application/json")
+                jsondata = json.loads(data.text)
 
-            searchResults.append(SearchResult(
-                source="Guitar Center", name=product_name, price=product_price, url=response.url))
-
-            print("Guitar Center Results Fetched")
-        else:
-            for title in product_titles:
-                product_text = title.text.strip()
-                split_product_text = product_text.split("$")
-                title_href = title.find("a", href=True)
-                print(title_href['href'])
+                product_price = jsondata["props"]["pageProps"]["dehydratedState"]["queries"][
+                    0]["state"]["data"]["PDPStyleSelector"]['styleSelectorArr'][0]['salePrice']
 
                 searchResults.append(SearchResult(
-                    source="Guitar Center", name=split_product_text[0], price=split_product_text[1], url="https://www.guitarcenter.com" + title_href['href']))
+                    source="Guitar Center", name=product_name, price=product_price, url=response.url))
 
-            print("Guitar Center Results Fetched")
+                print("Guitar Center Results Fetched")
+            else:
+                for title in product_titles:
+                    product_text = title.text.strip()
+                    split_product_text = product_text.split("$")
+                    title_href = title.find("a", href=True)
+                    print(title_href['href'])
+
+                    searchResults.append(SearchResult(
+                        source="Guitar Center", name=split_product_text[0], price=split_product_text[1], url="https://www.guitarcenter.com" + title_href['href']))
+
+                print("Guitar Center Results Fetched")
+        except:
+            print("Error fetching Guitar Center Results")
     else:
         print(f"Failed to retrieve guitar center price. Status code: {
               response.status_code}")
@@ -164,7 +170,7 @@ def get_amazon_results(search_query):
     # Parameters for the API request
     params = {
         "key": GOOGLE_API_KEY,
-        "cx": "b3d9512d0c5d2447a",        # Custom Search Engine ID
+        "cx": GOOGLE_CUSTOM_SEARCH_ENGINE_KEY,        # Custom Search Engine ID
         "q": search_query,
         "num": 10,           # Number of results (max 10 per request)
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36"
@@ -187,24 +193,28 @@ def get_amazon_results(search_query):
     # generally speaking there's only 1 amazon url. Repeat urls from the google search lead back to the same page, so we only need to check the first one
     response = requests.get(amazon_urls[0])
     if response.status_code == 200:
-        soup = BeautifulSoup(response.content, "html.parser")
+        try:
+            soup = BeautifulSoup(response.content, "html.parser")
 
-        title_element = soup.find("span", id="productTitle")
-        product_title = title_element.text.strip() if title_element else "Title not found"
+            title_element = soup.find("span", id="productTitle")
+            product_title = title_element.text.strip() if title_element else "Title not found"
 
-        price_element = soup.find("span", class_="a-price-whole")
-        price_fraction_element = soup.find("span", class_="a-price-fraction")
+            price_element = soup.find("span", class_="a-price-whole")
+            price_fraction_element = soup.find(
+                "span", class_="a-price-fraction")
 
-        if price_element:
-            product_price = price_element.text.strip()
-            if price_fraction_element:
-                product_price += price_fraction_element.text.strip()
+            if price_element:
+                product_price = price_element.text.strip()
+                if price_fraction_element:
+                    product_price += price_fraction_element.text.strip()
 
-            searchResults.append(SearchResult(
-                source="Amazon", name=product_title, price=product_price, url=amazon_urls[0]))
-            print("Amazon Results Fetched")
-        else:
-            product_price = "Price not found"
+                searchResults.append(SearchResult(
+                    source="Amazon", name=product_title, price=product_price, url=amazon_urls[0]))
+                print("Amazon Results Fetched")
+            else:
+                product_price = "Price not found"
+        except:
+            print("Error fetching Amazon Results")
     else:
         print(f"Failed to retrieve amazon price. Status code: {
               response.status_code}")
@@ -249,7 +259,7 @@ def main():
     print(f"Fetching Product info for SKU: {sku} ...")
 
     get_ebay_price(sku)
-    get_guitar_center_price("Roland AX-Edge Keytar Synthesizer White")
+    get_guitar_center_price(item_name)
     get_amazon_results(sku)
 
     if len(searchResults) == 0:
