@@ -23,6 +23,23 @@ SKU Price Fetcher is a tool designed to fetch and display prices for various SKU
 
     GOOGLE_API_KEY = yourgoogleapikey
     ```
+4. Create a virtual environment
+   ```
+   python -m venv venv_name
+   ```
+5. activate virtual environment 
+   (windows)
+   ```
+   venv_name\Scripts\activate
+   ```
+      (MacOS/Linux)
+   ```
+    source venv_name/bin/activate
+   ```
+6. Install Dependences
+    ```
+    pip install -r requirements.txt
+    ```
 
 
 ## Usage
