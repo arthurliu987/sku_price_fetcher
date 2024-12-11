@@ -22,6 +22,7 @@ SKU Price Fetcher is a tool designed to fetch and display prices for various SKU
     CLIENT_SECRET = yourebayclientsecret
 
     GOOGLE_API_KEY = yourgoogleapikey
+    GOOGLE_CUSTOM_SEARCH_ENGINE_KEY = yourgooglecustomsearchengineAPIkey
     ```
 4. Create a virtual environment
    ```
