@@ -1,11 +1,12 @@
+import os
 import smtplib
 import pandas as pd
 from email.message import EmailMessage
 import string
 
 # Configuration
-GMAIL_USER = "spacewaffle3000@gmail.com"
-GMAIL_PASSWORD = "egrj doad ihti iskj"  # Use an App Password if you have 2FA enabled
+GMAIL_USER = os.getenv("GMAIL_USER")
+GMAIL_PASSWORD = os.getenv("GMAIL_PASSWORD")
 CSV_FILE = "contacts_test.csv"
 TEMPLATE_FILE = "email_template.txt"
 
