@@ -1,0 +1,8 @@
+Dear {first_name} {last_name},
+
+I hope this email finds you well. My name is Kristen Price, and I recently completed my articling term at Gowling WLG and was called to the Ontario Bar on March 10, 2025. I am interested in {company}'s work in transactions and corporate law. {details}.
+
+I am reaching out to express my interest in potential opportunities within your team and have attached my CV for your reference. I welcome the opportunity to meet or speak with you to discuss how I may contribute to your firm. 
+
+Kind regards,
+Kristen
